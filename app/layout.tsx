@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gummy Fever - Premium Gummy Clothing",
-  description: "Discover premium gummy clothing at Gummy Fever",
+  title: "Gummy Fever - Turn up the HEAT",
+  description: "Turn up the HEAT with Gummy Fever premium clothing.",
 };
 
 export default function RootLayout({
