@@ -30,7 +30,7 @@ export default function ContactPage() {
 
       <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 uppercase">Contact Us</h1>
+          <h1 className="text-4xl font-bold mb-8 uppercase text-white">Contact Us</h1>
           
           {submitted ? (
             <div className="bg-green-50 border border-green-200 p-6 mb-6">
@@ -41,7 +41,7 @@ export default function ContactPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block mb-2 font-medium">
+                <label htmlFor="name" className="block mb-2 font-medium text-white">
                   Name
                 </label>
                 <input
@@ -56,7 +56,7 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block mb-2 font-medium">
+                <label htmlFor="email" className="block mb-2 font-medium text-white">
                   Email
                 </label>
                 <input
@@ -71,7 +71,7 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <label htmlFor="message" className="block mb-2 font-medium">
+                <label htmlFor="message" className="block mb-2 font-medium text-white">
                   Message
                 </label>
                 <textarea
@@ -95,9 +95,9 @@ export default function ContactPage() {
           )}
 
           <div className="mt-12 pt-8 border-t border-black">
-            <h2 className="text-2xl font-bold mb-4">Other Ways to Reach Us</h2>
-            <div className="space-y-2 text-gray-600">
-              <p>Email: info@gummyfever.com</p>
+            <h2 className="text-2xl font-bold mb-4 text-white">Other Ways to Reach Us</h2>
+            <div className="space-y-2 text-white">
+              <p>Email: melting@gummyfever.com</p>
               <p>Phone: (555) 123-4567</p>
             </div>
           </div>

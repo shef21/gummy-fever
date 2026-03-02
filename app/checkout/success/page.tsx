@@ -11,10 +11,10 @@ export default function CheckoutSuccessPage() {
       <Cart />
 
       <main className="flex-1 flex items-center justify-center px-4 py-20">
-        <div className="max-w-md text-center">
+        <div className="max-w-md text-center text-white">
           <CheckCircle className="w-16 h-16 mx-auto mb-6 text-green-600" />
           <h1 className="text-3xl font-bold mb-4">Order Confirmed!</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-white mb-8">
             Thank you for your purchase. You will receive a confirmation email
             shortly.
           </p>

@@ -9,10 +9,10 @@ export default function PrivacyPage() {
       <Cart />
 
       <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto text-black">
           <h1 className="text-4xl font-bold mb-8 uppercase">Privacy Policy</h1>
-          <div className="prose prose-lg max-w-none">
-            <p className="mb-6 text-sm text-gray-600">
+          <div className="prose prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black">
+            <p className="mb-6 text-sm text-black">
               Last updated: {new Date().toLocaleDateString()}
             </p>
             <h2 className="text-2xl font-bold mt-8 mb-4">Information We Collect</h2>

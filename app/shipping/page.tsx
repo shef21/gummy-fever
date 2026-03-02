@@ -9,9 +9,9 @@ export default function ShippingPage() {
       <Cart />
 
       <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto text-white">
           <h1 className="text-4xl font-bold mb-8 uppercase">Shipping</h1>
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black">
             <h2 className="text-2xl font-bold mt-8 mb-4">Shipping Options</h2>
             <p className="mb-6">
               We offer various shipping options to meet your needs. All orders

@@ -3,13 +3,17 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Cart from '@/components/Cart'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/server'
+import { getProductsByCollection } from '@/lib/data/products'
 
-interface Product {
+interface ProductRow {
   id: string
   name: string
   price: number
   images: string[]
-  category_id: string
+  category_id: string | null
+  featured: boolean
+  in_stock: boolean
 }
 
 export default async function CollectionPage({
@@ -17,33 +21,53 @@ export default async function CollectionPage({
 }: {
   params: { slug: string }
 }) {
-  // Local UI only - no Supabase connection yet
-  const displayProducts: Product[] = []
+  const supabase = await createClient()
+  let displayProducts: ProductRow[] = []
+
+  if (supabase) {
+    if (params.slug === 'all') {
+      const { data } = await supabase
+        .from('products')
+        .select('id, name, price, images, category_id, featured, in_stock')
+        .eq('in_stock', true)
+        .order('created_at', { ascending: false })
+      displayProducts = (data ?? []) as ProductRow[]
+    } else {
+      const { data } = await supabase
+        .from('products')
+        .select('id, name, price, images, category_id, featured, in_stock')
+        .eq('in_stock', true)
+        .eq('featured', true)
+        .order('created_at', { ascending: false })
+      displayProducts = (data ?? []) as ProductRow[]
+    }
+  }
+
+  if (displayProducts.length === 0) {
+    displayProducts = getProductsByCollection(params.slug) as ProductRow[]
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <Cart />
 
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 uppercase">
+          <h1 className="text-4xl font-bold mb-8 uppercase text-white">
             {params.slug.replace('-', ' ')}
           </h1>
 
           {displayProducts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-gray-500 text-lg mb-4">
-                No products available yet.
-              </p>
-              <p className="text-sm text-gray-400 mb-4">
-                This is a local UI preview. Products will appear here once connected to a database.
+              <p className="text-white text-lg mb-4">
+                No products in this collection yet.
               </p>
               <Link
-                href="/"
-                className="mt-4 inline-block text-black underline hover:no-underline"
+                href="/collections/all"
+                className="mt-4 inline-block text-white underline hover:no-underline"
               >
-                Back to Home
+                View all
               </Link>
             </div>
           ) : (
@@ -54,7 +78,7 @@ export default async function CollectionPage({
                   href={`/products/${product.id}`}
                   className="group"
                 >
-                  <div className="relative aspect-square bg-gray-100 mb-4 overflow-hidden">
+                  <div className="relative aspect-square bg-gray-800 mb-4 overflow-hidden">
                     {product.images && product.images[0] ? (
                       <Image
                         src={product.images[0]}
@@ -63,15 +87,15 @@ export default async function CollectionPage({
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-white">
                         No Image
                       </div>
                     )}
                   </div>
-                  <h3 className="font-medium mb-1 group-hover:underline">
+                  <h3 className="font-medium mb-1 group-hover:underline text-white">
                     {product.name}
                   </h3>
-                  <p className="text-sm font-bold">${product.price.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-white">R {Number(product.price).toFixed(2)}</p>
                 </Link>
               ))}
             </div>

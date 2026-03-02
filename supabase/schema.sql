@@ -86,40 +86,52 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Add triggers for updated_at
+-- Drop triggers if they exist (so script is safe to re-run), then create
+DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_product_variants_updated_at ON product_variants;
 CREATE TRIGGER update_product_variants_updated_at BEFORE UPDATE ON product_variants
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 
--- Policies for public read access to products and categories
+-- Drop policies if they exist (so script is safe to re-run), then create
+DROP POLICY IF EXISTS "Public can view products" ON products;
 CREATE POLICY "Public can view products" ON products
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public can view categories" ON categories;
 CREATE POLICY "Public can view categories" ON categories
   FOR SELECT USING (true);
 
--- Policies for authenticated users to manage their own orders
+DROP POLICY IF EXISTS "Public can view product_variants" ON product_variants;
+CREATE POLICY "Public can view product_variants" ON product_variants
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can view their own orders" ON orders;
 CREATE POLICY "Users can view their own orders" ON orders
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create their own orders" ON orders;
 CREATE POLICY "Users can create their own orders" ON orders
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Policies for newsletter subscribers (public insert)
+DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON newsletter_subscribers;
 CREATE POLICY "Anyone can subscribe to newsletter" ON newsletter_subscribers
   FOR INSERT WITH CHECK (true);

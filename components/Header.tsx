@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCartStore } from '@/lib/store/cart-store'
 import { useState } from 'react'
@@ -26,12 +27,15 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link 
-            href="/" 
-            className="!text-black text-2xl font-bold"
-            style={{ color: '#000000' }}
-          >
-            GUMMY FEVER
+          <Link href="/" className="flex items-center shrink-0">
+            <Image
+              src="/hero.jpeg"
+              alt="Gummy Fever"
+              width={140}
+              height={100}
+              className="h-16 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -48,32 +52,34 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Cart Button */}
-          <button
-            onClick={openCart}
-            className="relative flex items-center space-x-2 hover:opacity-70 transition-opacity !text-black"
-            style={{ color: '#000000' }}
-          >
-            <ShoppingCart className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
-            {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {itemCount}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Cart Button */}
+            <button
+              onClick={openCart}
+              className="relative flex items-center space-x-2 hover:opacity-70 transition-opacity !text-black"
+              style={{ color: '#000000' }}
+            >
+              <ShoppingCart className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </button>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden !text-black"
-            style={{ color: '#000000' }}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
-            ) : (
-              <Menu className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
-            )}
-          </button>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden !text-black"
+              style={{ color: '#000000' }}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
+              ) : (
+                <Menu className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

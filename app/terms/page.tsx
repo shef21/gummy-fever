@@ -9,10 +9,10 @@ export default function TermsPage() {
       <Cart />
 
       <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto text-white">
           <h1 className="text-4xl font-bold mb-8 uppercase">Terms of Use</h1>
-          <div className="prose prose-lg max-w-none">
-            <p className="mb-6 text-sm text-gray-600">
+          <div className="prose prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black">
+            <p className="mb-6 text-sm text-white">
               Last updated: {new Date().toLocaleDateString()}
             </p>
             <h2 className="text-2xl font-bold mt-8 mb-4">Acceptance of Terms</h2>
@@ -42,7 +42,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-bold mt-8 mb-4">Contact Information</h2>
             <p className="mb-6">
               If you have any questions about these Terms of Use, please contact
-              us at legal@gummyfever.com
+              us at melting@gummyfever.com
             </p>
           </div>
         </div>

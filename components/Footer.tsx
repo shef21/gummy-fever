@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className="text-xl font-bold mb-4">GUMMY FEVER</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-white">
               Premium gummy clothing for every occasion.
             </p>
           </div>
@@ -16,19 +16,19 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="font-semibold mb-4 uppercase text-sm">Shop</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2 text-sm text-white">
               <li>
-                <Link href="/collections/new" className="hover:text-white">
+                <Link href="/collections/new" className="hover:opacity-80">
                   New In
                 </Link>
               </li>
               <li>
-                <Link href="/collections/all" className="hover:text-white">
+                <Link href="/collections/all" className="hover:opacity-80">
                   Shop All
                 </Link>
               </li>
               <li>
-                <Link href="/collections/featured" className="hover:text-white">
+                <Link href="/collections/featured" className="hover:opacity-80">
                   Featured
                 </Link>
               </li>
@@ -40,19 +40,19 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 uppercase text-sm">
               Customer Service
             </h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2 text-sm text-white">
               <li>
-                <Link href="/shipping" className="hover:text-white">
+                <Link href="/shipping" className="hover:opacity-80">
                   Shipping
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="hover:text-white">
+                <Link href="/returns" className="hover:opacity-80">
                   Returns
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white">
+                <Link href="/contact" className="hover:opacity-80">
                   Contact
                 </Link>
               </li>
@@ -62,14 +62,14 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="font-semibold mb-4 uppercase text-sm">Legal</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2 text-sm text-white">
               <li>
-                <Link href="/privacy" className="hover:text-white">
+                <Link href="/privacy" className="hover:opacity-80">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-white">
+                <Link href="/terms" className="hover:opacity-80">
                   Terms of Use
                 </Link>
               </li>
@@ -83,7 +83,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 uppercase text-sm">
               Join Gummy Fever
             </h4>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-white mb-4">
               Get early access to new products, exclusive offers, and community
               events.
             </p>
@@ -104,7 +104,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm text-gray-400">
+        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm text-white">
           <p>© {new Date().getFullYear()} Gummy Fever. All rights reserved.</p>
         </div>
       </div>
