@@ -32,6 +32,18 @@ export default async function Home() {
     featuredProducts = getFeaturedProducts() as ProductRow[]
   }
 
+  // Ensure we don't show duplicate items if the database
+  // accidentally has multiple featured rows for the same product
+  if (featuredProducts.length > 0) {
+    const uniqueByName = new Map<string, ProductRow>()
+    for (const product of featuredProducts) {
+      if (!uniqueByName.has(product.name)) {
+        uniqueByName.set(product.name, product)
+      }
+    }
+    featuredProducts = Array.from(uniqueByName.values())
+  }
+
   const collections = [
     {
       title: 'NEW IN',

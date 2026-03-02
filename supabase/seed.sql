@@ -12,7 +12,13 @@ SELECT
   p.name,
   'Premium boxy fit tee. Heavyweight cotton/polyester blend, relaxed cut. Part of the Big Boxy Bear range — wear it when you''re ready to be seen.',
   599.00,
-  ARRAY['https://placehold.co/600x600/e5e5e5/737373?text=Big+Boxy+Bear']::text[],
+  CASE
+    WHEN p.name = 'Big Boxy Bear T-shirt — Black'
+      THEN ARRAY['/left.png','/middle.jpeg','/right.jpeg']::text[]
+    WHEN p.name = 'Big Boxy Bear T-shirt — Beige'
+      THEN ARRAY['/beige1.jpeg','/beige2.jpeg']::text[]
+    
+  END,
   c.id,
   true,
   true
@@ -25,8 +31,3 @@ CROSS JOIN (
     ('Big Boxy Bear T-shirt — Green')
 ) AS p(name)
 WHERE c.slug = 'tshirts';
-
--- Use real images for the Big Boxy Bear Black tee instead of placeholders
-UPDATE products
-SET images = ARRAY['/left.png','/middle.jpeg','/right.jpeg']::text[]
-WHERE name = 'Big Boxy Bear T-shirt — Black';

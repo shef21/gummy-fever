@@ -9,9 +9,6 @@ export interface Product {
   featured?: boolean
 }
 
-const PLACEHOLDER = (label: string) =>
-  `https://placehold.co/600x600/e5e5e5/737373?text=${encodeURIComponent(label)}`
-
 const boxyBearDescription =
   'Premium boxy fit tee. Heavyweight cotton, relaxed cut. Part of the Boxy Bear range—wear it when you\'re ready to be seen.'
 
@@ -21,7 +18,7 @@ export const products: Product[] = [
     name: 'Boxy Bear Tshirt',
     description: boxyBearDescription,
     price: 45.0,
-    images: [PLACEHOLDER('Boxy Bear Tshirt')],
+    images: [],
     category_id: 'tshirts',
     in_stock: true,
     featured: true,
@@ -41,7 +38,7 @@ export const products: Product[] = [
     name: 'Boxy Bear Tshirt — White',
     description: boxyBearDescription,
     price: 45.0,
-    images: [PLACEHOLDER('Boxy Bear — White')],
+    images: [],
     category_id: 'tshirts',
     in_stock: true,
     featured: true,
@@ -51,7 +48,7 @@ export const products: Product[] = [
     name: 'Boxy Bear Tshirt — Grey',
     description: boxyBearDescription,
     price: 45.0,
-    images: [PLACEHOLDER('Boxy Bear — Grey')],
+    images: [],
     category_id: 'tshirts',
     in_stock: true,
     featured: true,
