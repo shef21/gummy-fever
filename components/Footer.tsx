@@ -105,7 +105,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm text-white">
-          <p>© {new Date().getFullYear()} Gummy Fever. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} The Shico Group. All rights reserved.</p>
         </div>
       </div>
     </footer>
