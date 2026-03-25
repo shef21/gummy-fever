@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = false
-
 export default function LoginPage() {
   const router = useRouter()
   const [safeReturnUrl, setSafeReturnUrl] = useState('/checkout')
