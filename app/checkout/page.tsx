@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Cart from '@/components/Cart'
 import { useCartStore } from '@/lib/store/cart-store'
+import { createClient } from '@/lib/supabase/client'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, getTotal, clearCart } = useCartStore()
+  const [authLoading, setAuthLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -24,13 +27,37 @@ export default function CheckoutPage() {
   })
   const [processing, setProcessing] = useState(false)
 
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient()
+      if (!supabase) {
+        setUserId(null)
+        setAuthLoading(false)
+        return
+      }
+
+      const { data, error } = await supabase.auth.getUser()
+      if (error) {
+        console.error('Checkout auth.getUser() failed', error)
+        setUserId(null)
+      } else {
+        setUserId(data.user?.id ?? null)
+      }
+      setAuthLoading(false)
+    }
+    loadUser()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!userId) {
+      setProcessing(false)
+      router.push(`/login?returnUrl=${encodeURIComponent('/checkout')}`)
+      return
+    }
     setProcessing(true)
 
-    // Here you would integrate with your payment processor (Stripe, etc.)
-    // For now, we'll simulate a successful order
-    
+    // Fake processor: simulate a successful order for now.
     setTimeout(() => {
       clearCart()
       setProcessing(false)
@@ -216,10 +243,16 @@ export default function CheckoutPage() {
                 </div>
                 <button
                   type="submit"
-                  disabled={processing}
+                  disabled={processing || authLoading || !userId}
                   className="w-full mt-6 bg-black text-white py-4 font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {processing ? 'Processing...' : 'Complete Order'}
+                  {authLoading
+                    ? 'Checking login...'
+                    : !userId
+                      ? 'Login to Checkout'
+                      : processing
+                        ? 'Processing...'
+                        : 'Complete Order'}
                 </button>
               </div>
             </div>
