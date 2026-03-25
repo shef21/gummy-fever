@@ -1,17 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const rawReturnUrl = searchParams.get('returnUrl') ?? '/checkout'
+  const [safeReturnUrl, setSafeReturnUrl] = useState('/checkout')
 
-  const safeReturnUrl = useMemo(() => {
-    return rawReturnUrl.startsWith('/') ? rawReturnUrl : '/checkout'
-  }, [rawReturnUrl])
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const rawReturnUrl = params.get('returnUrl') ?? '/checkout'
+    setSafeReturnUrl(rawReturnUrl.startsWith('/') ? rawReturnUrl : '/checkout')
+  }, [])
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
