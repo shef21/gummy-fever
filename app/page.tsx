@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
+import SiteShell from '@/components/SiteShell'
+import ProductCard from '@/components/ProductCard'
+import NewsletterForm from '@/components/NewsletterForm'
 import { createClient } from '@/lib/supabase/server'
 import { getFeaturedProducts } from '@/lib/data/products'
 
@@ -32,8 +32,6 @@ export default async function Home() {
     featuredProducts = getFeaturedProducts() as ProductRow[]
   }
 
-  // Ensure we don't show duplicate items if the database
-  // accidentally has multiple featured rows for the same product
   if (featuredProducts.length > 0) {
     const uniqueByName = new Map<string, ProductRow>()
     for (const product of featuredProducts) {
@@ -46,202 +44,160 @@ export default async function Home() {
 
   const collections = [
     {
-      title: 'NEW IN',
+      title: 'New In',
       href: '/collections/new',
-      image: '/collections/new.jpg',
+      image: '/left.png',
     },
     {
-      title: 'FEATURED',
+      title: 'Featured',
       href: '/collections/featured',
-      image: '/collections/featured.jpg',
+      image: '/middle.jpeg',
     },
     {
-      title: 'SHOP ALL',
+      title: 'Shop All',
       href: '/collections/all',
-      image: '/collections/all.jpg',
+      image: '/right.jpeg',
     },
   ]
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#ffffff' }}>
-      <Header />
-      <Cart />
-
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[80vh] flex items-center justify-center text-white overflow-hidden">
-          {/* Image strip background */}
-          <div className="absolute inset-0 grid grid-cols-3">
-            <div className="relative">
-              <Image
-                src="/left.png"
-                alt="Gummy Fever left feature"
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
-            <div className="relative">
-              <Image
-                src="/middle.jpeg"
-                alt="Gummy Fever middle feature"
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
-            <div className="relative">
-              <Image
-                src="/right.jpeg"
-                alt="Gummy Fever right feature"
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
+    <SiteShell>
+      <section className="relative flex h-[70vh] min-h-[28rem] items-center justify-center overflow-hidden text-white sm:h-[80vh]">
+        <div className="absolute inset-0 grid grid-cols-3">
+          <div className="relative">
+            <Image
+              src="/left.png"
+              alt="Gummy Fever look, back print on a black tee"
+              fill
+              priority
+              sizes="33vw"
+              className="object-cover"
+            />
           </div>
+          <div className="relative">
+            <Image
+              src="/middle.jpeg"
+              alt="Gummy Fever look, front graphic tee"
+              fill
+              priority
+              sizes="33vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="relative">
+            <Image
+              src="/right.jpeg"
+              alt="Gummy Fever look, studio portrait"
+              fill
+              priority
+              sizes="33vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
 
-          {/* Dark overlay for readability */}
-          <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 bg-black/65" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/40"
+          aria-hidden="true"
+        />
 
-          {/* Centered content */}
-          <div className="relative z-10 text-center px-4">
-            <h1 className="text-5xl md:text-7xl font-bold mb-4">
-              GUMMY FEVER
-            </h1>
-            <p className="text-lg md:text-xl mb-8 text-white tracking-wide">
-              Turn up the heat
+        <div className="relative z-10 px-4 text-center">
+          <h1 className="hero-copy text-4xl font-bold uppercase tracking-tight text-white sm:text-6xl md:text-7xl">
+            Gummy Fever
+          </h1>
+          <p className="hero-copy mt-4 text-base tracking-wide text-white sm:text-lg md:text-xl">
+            Turn up the heat
+          </p>
+          <Link href="/collections/all" className="btn-invert mt-8">
+            Shop the melt
+          </Link>
+        </div>
+      </section>
+
+      <section className="bg-black px-4 py-16 text-white">
+        <div className="mx-auto max-w-3xl text-left md:text-center">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-white">
+            Brand Statement
+          </p>
+          <div className="space-y-4 text-sm leading-relaxed text-white md:text-base">
+            <p>
+              <span className="text-base font-semibold md:text-lg">
+                Gummy Fever was never about candy.
+              </span>{' '}
+              It&apos;s about pressure. About heat. About what happens when things start to melt.
+              We design for the loud creatives, the studio runners, the late-night planners, the
+              ones who don&apos;t move quiet. Every drop is intentional. Every piece carries
+              weight. Every graphic means something.
             </p>
-            <Link
-              href="/collections/all"
-              className="inline-block bg-white text-black px-8 py-4 font-bold uppercase tracking-wide hover:bg-gray-200 transition-colors"
-            >
-              SHOP THE MELT
-            </Link>
-          </div>
-        </section>
-
-        {/* Brand Statement */}
-        <section className="bg-black text-white py-16 px-4">
-          <div className="max-w-3xl mx-auto text-left md:text-center">
-            <p className="text-xs tracking-[0.25em] uppercase text-white mb-4">
-              Brand Statement
+            <p>
+              <span className="font-semibold">You don&apos;t wear Gummy Fever to blend in.</span>{' '}
+              <span className="font-semibold">You wear it when you&apos;re ready to be seen.</span>
             </p>
-            <div className="space-y-4 text-sm md:text-base leading-relaxed text-white">
-              <p>
-                <span className="font-semibold text-base md:text-lg">
-                  Gummy Fever was never about candy.
-                </span>{' '}
-                It&apos;s about pressure. About heat. About what happens when things
-                start to melt. We design for the loud creatives, the studio
-                runners, the late-night planners, the ones who don&apos;t move quiet.
-                Every drop is intentional. Every piece carries weight. Every
-                graphic means something.
-              </p>
-              <p>
-                <span className="font-semibold">
-                  You don&apos;t wear Gummy Fever to blend in.
-                </span>{' '}
-                <span className="font-semibold">
-                  You wear it when you&apos;re ready to be seen.
-                </span>
-              </p>
-            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Featured / Product strip */}
-        {featuredProducts.length > 0 && (
-          <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-            <div className="max-w-7xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-8 uppercase text-center text-black">
-                Shop the drop
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {featuredProducts.map((product) => (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.id}`}
-                    className="group"
-                  >
-                    <div className="relative aspect-square bg-gray-200 mb-4 overflow-hidden">
-                      {product.images?.[0] ? (
-                        <Image
-                          src={product.images[0]}
-                          alt={product.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-black">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-medium mb-1 group-hover:underline text-black">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm font-bold text-black">R {Number(product.price).toFixed(2)}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Collections Grid */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {collections.map((collection) => (
-                <Link
-                  key={collection.href}
-                  href={collection.href}
-                  className="group relative h-96 bg-gray-100 flex items-center justify-center overflow-hidden"
-                >
-                  <div className="text-center z-10 text-black">
-                    <h2 className="text-3xl font-bold mb-4 group-hover:underline">
-                      {collection.title}
-                    </h2>
-                    <span className="text-sm uppercase tracking-wide">
-                      Discover
-                    </span>
-                  </div>
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
-                </Link>
+      {featuredProducts.length > 0 ? (
+        <section className="section-y bg-neutral-50 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="mb-8 text-center text-2xl font-bold uppercase tracking-tight text-black md:text-3xl">
+              Shop the drop
+            </h2>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>
         </section>
-
-        {/* Newsletter Section */}
-        <section className="bg-black text-white py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              JOIN GUMMY FEVER
-            </h2>
-            <p className="text-white mb-8">
-              Get early access to seasonal sales, new arrivals, and community
-              events.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-gray-900 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white"
-              />
-              <button
-                type="submit"
-                className="bg-white text-black px-8 py-3 font-bold uppercase tracking-wide hover:bg-gray-200 transition-colors"
-              >
-                Submit
-              </button>
-            </form>
-          </div>
+      ) : (
+        <section className="section-y bg-neutral-50 px-4 text-center">
+          <h2 className="text-2xl font-bold uppercase text-black">Shop the drop</h2>
+          <p className="mt-3 text-neutral-800">The next drop is not listed yet.</p>
         </section>
-      </main>
+      )}
 
-      <Footer />
-    </div>
+      <section className="section-y px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-3">
+          {collections.map((collection) => (
+            <Link
+              key={collection.href}
+              href={collection.href}
+              className="group relative flex h-80 items-center justify-center overflow-hidden bg-neutral-100 sm:h-96"
+            >
+              <Image
+                src={collection.image}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-black/55 transition-colors group-hover:bg-black/65" />
+              <div className="relative z-10 px-4 text-center text-white">
+                <h2 className="hero-copy text-3xl font-bold uppercase">{collection.title}</h2>
+                <span className="hero-copy mt-3 inline-block text-sm uppercase tracking-[0.16em]">
+                  Discover
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-black px-4 py-16 text-white sm:px-6 lg:px-8 sm:py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold uppercase tracking-tight text-white md:text-4xl">
+            Join Gummy Fever
+          </h2>
+          <p className="mx-auto mt-4 mb-8 max-w-lg text-white">
+            Get early access to seasonal sales, new arrivals, and community events.
+          </p>
+          <div className="mx-auto max-w-md">
+            <NewsletterForm invert id="home-newsletter-email" />
+          </div>
+        </div>
+      </section>
+    </SiteShell>
   )
 }

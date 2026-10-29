@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
+import SiteShell from '@/components/SiteShell'
+import { CONTACT_EMAIL, OPERATOR_COUNTRY, OPERATOR_NAME } from '@/lib/site'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -15,7 +14,6 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would send the form data to your backend/email service
     setSubmitted(true)
     setTimeout(() => {
       setSubmitted(false)
@@ -24,87 +22,92 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <Cart />
+    <SiteShell>
+      <div className="page-shell max-w-2xl py-12 sm:py-16">
+        <p className="eyebrow">Support</p>
+        <h1 className="display-title mt-3">Contact us</h1>
+        <p className="mt-4 text-neutral-800">
+          For orders, fit, shipping, or privacy requests, email{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
+            {CONTACT_EMAIL}
+          </a>
+          . The form below currently confirms in the browser only.
+        </p>
 
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 uppercase text-white">Contact Us</h1>
-          
-          {submitted ? (
-            <div className="bg-green-50 border border-green-200 p-6 mb-6">
-              <p className="text-green-800">
-                Thank you for your message! We&apos;ll get back to you soon.
-              </p>
+        {submitted ? (
+          <div className="mt-8 border border-black bg-neutral-50 p-6" role="status">
+            <p className="font-medium text-black">
+              Thanks — this form is not connected to a mailbox yet. Please also email{' '}
+              {CONTACT_EMAIL} so we receive your message.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div>
+              <label htmlFor="name" className="mb-2 block font-medium text-black">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                autoComplete="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="input-field"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block mb-2 font-medium text-white">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block mb-2 font-medium text-white">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block mb-2 font-medium text-white">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  required
-                  rows={6}
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-black text-white py-4 font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >
-                Send Message
-              </button>
-            </form>
-          )}
+            <div>
+              <label htmlFor="email" className="mb-2 block font-medium text-black">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="mb-2 block font-medium text-black">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={6}
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                className="input-field min-h-[10rem]"
+              />
+            </div>
+            <button type="submit" className="btn-primary w-full">
+              Send message
+            </button>
+          </form>
+        )}
 
-          <div className="mt-12 pt-8 border-t border-black">
-            <h2 className="text-2xl font-bold mb-4 text-white">Other Ways to Reach Us</h2>
-            <div className="space-y-2 text-white">
-              <p>Email: melting@gummyfever.com</p>
-              <p>Phone: (555) 123-4567</p>
-            </div>
+        <div className="mt-12 border-t border-black pt-8">
+          <h2 className="text-2xl font-bold text-black">Other ways to reach us</h2>
+          <div className="mt-4 space-y-2 text-black">
+            <p>
+              Email:{' '}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
+                {CONTACT_EMAIL}
+              </a>
+            </p>
+            <p>
+              Operator: {OPERATOR_NAME}, {OPERATOR_COUNTRY}
+            </p>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </SiteShell>
   )
 }

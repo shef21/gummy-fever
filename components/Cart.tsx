@@ -1,136 +1,131 @@
 'use client'
 
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react'
+import { X, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/store/cart-store'
 import Image from 'next/image'
 import Link from 'next/link'
+import QuantityStepper from '@/components/QuantityStepper'
+import { formatZar } from '@/lib/format'
 
 export default function Cart() {
-  const {
-    items,
-    isOpen,
-    closeCart,
-    updateQuantity,
-    removeItem,
-    getTotal,
-  } = useCartStore()
+  const items = useCartStore((state) => state.items)
+  const isOpen = useCartStore((state) => state.isOpen)
+  const closeCart = useCartStore((state) => state.closeCart)
+  const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const removeItem = useCartStore((state) => state.removeItem)
+  const getTotal = useCartStore((state) => state.getTotal)
 
   if (!isOpen) return null
 
   return (
     <>
-      {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 z-50"
+        className="fixed inset-0 z-50 bg-black/60"
         onClick={closeCart}
+        aria-hidden="true"
       />
 
-      {/* Cart Sidebar */}
-      <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white z-50 shadow-xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-black">
-          <h2 className="text-xl font-bold uppercase text-black">Cart</h2>
+      <aside
+        className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-black bg-white text-black shadow-xl sm:w-96"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-title"
+      >
+        <div className="flex items-center justify-between border-b border-black px-5 py-4">
+          <h2 id="cart-title" className="text-xl font-bold uppercase tracking-tight text-black">
+            Cart
+          </h2>
           <button
+            type="button"
             onClick={closeCart}
-            className="hover:opacity-70 transition-opacity text-black"
+            className="tap text-black hover:opacity-70"
+            aria-label="Close cart"
           >
-            <X className="w-6 h-6" />
+            <X className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-5">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <ShoppingBag className="w-16 h-16 mb-4 opacity-20" />
-              <p className="text-black">Your cart is empty</p>
+            <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+              <ShoppingBag className="mb-4 h-12 w-12 text-neutral-700" aria-hidden="true" />
+              <p className="text-lg font-semibold text-black">Your cart is empty</p>
+              <p className="mt-2 text-sm text-neutral-800">
+                Nothing in the bag yet. Shop the current drop and add a piece when you are ready.
+              </p>
+              <Link
+                href="/collections/all"
+                onClick={closeCart}
+                className="btn-primary mt-6 w-full"
+              >
+                Shop the drop
+              </Link>
             </div>
           ) : (
-            <div className="space-y-6">
+            <ul className="space-y-6">
               {items.map((item) => {
                 const itemKey = item.variant ? `${item.id}-${item.variant}` : item.id
                 return (
-                <div key={itemKey} className="flex gap-4">
-                  <div className="relative w-20 h-20 bg-gray-100 flex-shrink-0">
-                    {item.image && (
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-sm text-black">{item.name}</h3>
-                    {item.variant && (
-                      <p className="text-xs text-black">{item.variant}</p>
-                    )}
-                    <p className="text-sm font-medium mt-1 text-black">
-                      R {item.price.toFixed(2)}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() =>
-                          updateQuantity(
-                            itemKey,
-                            item.quantity - 1
-                          )
-                        }
-                        className="border border-black w-8 h-8 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center text-black">{item.quantity}</span>
-                      <button
-                        onClick={() =>
-                          updateQuantity(
-                            itemKey,
-                            item.quantity + 1
-                          )
-                        }
-                        className="border border-black w-8 h-8 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                  <li key={itemKey} className="flex gap-4">
+                    <div className="relative h-20 w-20 flex-shrink-0 bg-neutral-100">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="sr-only">No image for {item.name}</span>
+                      )}
                     </div>
-                  </div>
-                  <button
-                    onClick={() => removeItem(itemKey)}
-                    className="text-black hover:text-black transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              )})}
-            </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-medium text-black">{item.name}</h3>
+                      {item.variant ? (
+                        <p className="text-xs text-neutral-800">{item.variant}</p>
+                      ) : null}
+                      <p className="mt-1 text-sm font-semibold text-black">
+                        {formatZar(item.price)}
+                      </p>
+                      <div className="mt-2">
+                        <QuantityStepper
+                          value={item.quantity}
+                          onDecrease={() => updateQuantity(itemKey, item.quantity - 1)}
+                          onIncrease={() => updateQuantity(itemKey, item.quantity + 1)}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(itemKey)}
+                      className="tap self-start text-black hover:opacity-70"
+                      aria-label={`Remove ${item.name} from cart`}
+                    >
+                      <X className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
           )}
         </div>
 
-        {/* Footer */}
-        {items.length > 0 && (
-          <div className="border-t border-black p-6 space-y-4">
+        {items.length > 0 ? (
+          <div className="space-y-3 border-t border-black p-5">
             <div className="flex justify-between text-lg font-bold text-black">
               <span>Total</span>
-              <span>R {getTotal().toFixed(2)}</span>
+              <span>{formatZar(getTotal())}</span>
             </div>
-            <Link
-              href="/checkout"
-              onClick={closeCart}
-              className="block w-full bg-black text-white py-3 text-center font-medium hover:bg-gray-800 transition-colors uppercase tracking-wide"
-            >
+            <Link href="/checkout" onClick={closeCart} className="btn-primary w-full">
               Checkout
             </Link>
-            <Link
-              href="/collections/all"
-              onClick={closeCart}
-              className="block w-full border border-black py-3 text-center font-medium hover:bg-black hover:text-white transition-colors uppercase tracking-wide"
-            >
-              Continue Shopping
+            <Link href="/collections/all" onClick={closeCart} className="btn-secondary w-full">
+              Continue shopping
             </Link>
           </div>
-        )}
-      </div>
+        ) : null}
+      </aside>
     </>
   )
 }

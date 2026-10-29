@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import SiteShell from '@/components/SiteShell'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -77,12 +78,10 @@ export default function LoginPage() {
           return
         }
 
-        // Email verification required: show "check email" state.
         setSent(true)
         return
       }
 
-      // Sign in with email + password
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -103,128 +102,128 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Reuse header/cart UI */}
-      {/* Header is already present globally on many pages; keep login simple. */}
+    <SiteShell>
+      <div className="page-shell max-w-md py-12 sm:py-16">
+        <p className="eyebrow">Account</p>
+        <h1 className="display-title mt-3">Account</h1>
+        <p className="mt-4 text-sm text-neutral-800">
+          Sign in to continue to checkout. You must be 18 or older to create an account.
+        </p>
 
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold mb-6 uppercase text-black">Account</h1>
+        <div className="mt-8 flex gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signin')
+              setSent(false)
+              setError(null)
+            }}
+            className={`flex-1 ${mode === 'signin' ? 'btn-primary' : 'btn-secondary'}`}
+            aria-pressed={mode === 'signin'}
+          >
+            Sign in
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signup')
+              setSent(false)
+              setError(null)
+            }}
+            className={`flex-1 ${mode === 'signup' ? 'btn-primary' : 'btn-secondary'}`}
+            aria-pressed={mode === 'signup'}
+          >
+            Sign up
+          </button>
+        </div>
 
-          <div className="flex gap-3 mb-6">
+        {sent ? (
+          <div className="mt-8 border border-black bg-neutral-50 p-6">
+            <p className="font-medium text-black">
+              Verification email sent. Please check your inbox to verify your account.
+            </p>
             <button
               type="button"
-              onClick={() => {
-                setMode('signin')
-                setSent(false)
-                setError(null)
-              }}
-              className={`flex-1 py-2 border border-black font-bold uppercase tracking-wide transition-colors ${
-                mode === 'signin' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
-              }`}
+              onClick={() => router.push(safeReturnUrl)}
+              className="btn-primary mt-6 w-full"
             >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('signup')
-                setSent(false)
-                setError(null)
-              }}
-              className={`flex-1 py-2 border border-black font-bold uppercase tracking-wide transition-colors ${
-                mode === 'signup' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
-              }`}
-            >
-              Sign Up
+              Continue
             </button>
           </div>
-
-          {sent ? (
-            <div className="bg-gray-50 border border-black p-6">
-              <p className="text-black font-medium">
-                Verification email sent. Please check your inbox to verify your account.
-              </p>
-              <button
-                type="button"
-                onClick={() => router.push(safeReturnUrl)}
-                className="mt-6 w-full bg-black text-white py-3 font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >
-                Continue
-              </button>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div>
+              <label className="mb-2 block font-medium text-black" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block mb-2 text-black font-medium" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
 
+            <div>
+              <label className="mb-2 block font-medium text-black" htmlFor="password">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+              />
+            </div>
+
+            {mode === 'signup' ? (
               <div>
-                <label className="block mb-2 text-black font-medium" htmlFor="password">
-                  Password
+                <label className="mb-2 block font-medium text-black" htmlFor="passwordConfirm">
+                  Confirm password
                 </label>
                 <input
-                  id="password"
+                  id="passwordConfirm"
                   type="password"
+                  autoComplete="new-password"
                   required
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  className="input-field"
                 />
               </div>
+            ) : null}
 
-              {mode === 'signup' && (
-                <div>
-                  <label
-                    className="block mb-2 text-black font-medium"
-                    htmlFor="passwordConfirm"
-                  >
-                    Confirm Password
-                  </label>
-                  <input
-                    id="passwordConfirm"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    className="w-full border border-black px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </div>
-              )}
-
-              {error && <p className="text-red-600 text-sm">{error}</p>}
-
-              <button
-                type="submit"
-                disabled={submitting || !email}
-                className="w-full bg-black text-white py-4 font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Sign in'}
-              </button>
-
-              <p className="text-sm text-gray-700">
-                {mode === 'signup'
-                  ? 'A verification email will be sent to your inbox.'
-                  : 'Sign in to continue to checkout.'}
+            {error ? (
+              <p className="text-sm font-medium text-red-800" role="alert">
+                {error}
               </p>
-            </form>
-          )}
-        </div>
-      </main>
-    </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={submitting || !email}
+              className="btn-primary w-full"
+            >
+              {submitting ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Sign in'}
+            </button>
+
+            <p className="text-sm text-neutral-800">
+              {mode === 'signup'
+                ? 'A verification email will be sent to your inbox.'
+                : 'Sign in to continue to checkout.'}
+            </p>
+          </form>
+        )}
+      </div>
+    </SiteShell>
   )
 }
-

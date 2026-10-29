@@ -9,8 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "var(--gf-bg)",
+        foreground: "var(--gf-ink)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "Helvetica", "Arial", "sans-serif"],
+      },
+      minHeight: {
+        tap: "44px",
+      },
+      minWidth: {
+        tap: "44px",
       },
     },
   },

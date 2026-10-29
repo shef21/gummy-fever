@@ -1,10 +1,9 @@
 import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
-import Image from 'next/image'
+import SiteShell from '@/components/SiteShell'
+import ProductCard from '@/components/ProductCard'
 import { createClient } from '@/lib/supabase/server'
 import { getProductsByCollection } from '@/lib/data/products'
+import { collectionTitle } from '@/lib/format'
 
 interface ProductRow {
   id: string
@@ -48,62 +47,31 @@ export default async function CollectionPage({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <Cart />
-
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 uppercase text-white">
-            {params.slug.replace('-', ' ')}
-          </h1>
+    <SiteShell>
+      <div className="section-y px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <p className="eyebrow">Collection</p>
+          <h1 className="display-title mt-3">{collectionTitle(params.slug)}</h1>
 
           {displayProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-white text-lg mb-4">
-                No products in this collection yet.
+            <div className="py-20 text-center">
+              <p className="text-lg text-black">No products in this collection yet.</p>
+              <p className="mt-2 text-sm text-neutral-800">
+                Limited drops sell through. Check Shop All for what is still available.
               </p>
-              <Link
-                href="/collections/all"
-                className="mt-4 inline-block text-white underline hover:no-underline"
-              >
+              <Link href="/collections/all" className="btn-primary mt-6">
                 View all
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {displayProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/products/${product.id}`}
-                  className="group"
-                >
-                  <div className="relative aspect-square bg-gray-800 mb-4 overflow-hidden">
-                    {product.images && product.images[0] ? (
-                      <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white">
-                        No Image
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="font-medium mb-1 group-hover:underline text-white">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm font-bold text-white">R {Number(product.price).toFixed(2)}</p>
-                </Link>
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </SiteShell>
   )
 }

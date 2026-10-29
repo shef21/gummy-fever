@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import SiteShell from '@/components/SiteShell'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginCallbackPage() {
@@ -34,9 +35,12 @@ export default function LoginCallbackPage() {
   }, [router, safeReturnUrl])
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <p className="text-black">Logging you in...</p>
-    </div>
+    <SiteShell>
+      <div className="flex min-h-[50vh] items-center justify-center px-4">
+        <p className="text-black" aria-live="polite">
+          Logging you in...
+        </p>
+      </div>
+    </SiteShell>
   )
 }
-
