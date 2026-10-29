@@ -1,43 +1,94 @@
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import LegalPage, { LegalH2, Placeholder } from '@/components/LegalPage'
+import { CONTACT_EMAIL, OPERATOR_COUNTRY, PLACEHOLDERS, SITE_NAME } from '@/lib/site'
+
+export const metadata: Metadata = {
+  title: 'Shipping & Delivery',
+  alternates: { canonical: '/shipping' },
+}
 
 export default function ShippingPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <Cart />
+    <LegalPage kicker="Customer service" title="Shipping & Delivery">
+      <p>
+        {SITE_NAME} ships clothing. We operate from {OPERATOR_COUNTRY}. Exact courier names,
+        delivery windows, and fees are not coded in this shop yet, so they are marked as
+        placeholders. Email{' '}
+        <a className="underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>
+          {CONTACT_EMAIL}
+        </a>{' '}
+        if you need a quote for your suburb before you order.
+      </p>
 
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-white">
-          <h1 className="text-4xl font-bold mb-8 uppercase">Shipping</h1>
-          <div className="prose prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black">
-            <h2 className="text-2xl font-bold mt-8 mb-4">Shipping Options</h2>
-            <p className="mb-6">
-              We offer various shipping options to meet your needs. All orders
-              are processed within 1-2 business days.
-            </p>
-            <h2 className="text-2xl font-bold mt-8 mb-4">Shipping Rates</h2>
-            <ul className="list-disc pl-6 mb-6 space-y-2">
-              <li>Standard Shipping: $5.99 (5-7 business days)</li>
-              <li>Express Shipping: $9.99 (2-3 business days)</li>
-              <li>Overnight Shipping: $19.99 (Next business day)</li>
-            </ul>
-            <h2 className="text-2xl font-bold mt-8 mb-4">International Shipping</h2>
-            <p className="mb-6">
-              International shipping rates vary by destination. Please contact us
-              for specific rates to your country.
-            </p>
-            <h2 className="text-2xl font-bold mt-8 mb-4">Tracking</h2>
-            <p className="mb-6">
-              Once your order ships, you will receive a tracking number via
-              email to monitor your package&apos;s journey.
-            </p>
-          </div>
-        </div>
-      </main>
+      <LegalH2>Where we deliver</LegalH2>
+      <p>
+        Default fulfilment is within {OPERATOR_COUNTRY}. International delivery, if offered, will
+        be confirmed by email. Customs, duties, and taxes outside South Africa are not included
+        unless we say so in writing.
+      </p>
 
-      <Footer />
-    </div>
+      <LegalH2>Processing</LegalH2>
+      <p>
+        Orders are packed after checkout is completed and the piece is still in stock. Limited
+        drops can sell out between adding to cart and paying. If we cannot fulfil an item we will
+        contact the email on the account or checkout form.
+      </p>
+      <p>
+        This website&apos;s checkout currently simulates a successful order after sign-in and is
+        not connected to a payment processor. A courier will not be booked until real fulfilment
+        is switched on.
+      </p>
+
+      <LegalH2>Options and fees (placeholders)</LegalH2>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>
+          Standard: <Placeholder>{PLACEHOLDERS.standardDeliveryTime}</Placeholder> —{' '}
+          <Placeholder>{PLACEHOLDERS.standardDeliveryFee}</Placeholder>
+        </li>
+        <li>
+          Express: <Placeholder>{PLACEHOLDERS.expressDeliveryTime}</Placeholder> —{' '}
+          <Placeholder>{PLACEHOLDERS.expressDeliveryFee}</Placeholder>
+        </li>
+        <li>
+          Overnight: <Placeholder>{PLACEHOLDERS.overnightDeliveryTime}</Placeholder> —{' '}
+          <Placeholder>{PLACEHOLDERS.overnightDeliveryFee}</Placeholder>
+        </li>
+      </ul>
+      <p>
+        Prices on product pages are in rand (R). Delivery fees above are owner-filled; this site
+        does not calculate postage at checkout yet.
+      </p>
+
+      <LegalH2>Address and risk</LegalH2>
+      <p>
+        You are responsible for a complete, accurate shipping address. If a parcel is returned
+        because the address was wrong, we may charge you to resend it. Risk in the goods passes
+        according to the CPA and the courier&apos;s scan when a real shipment exists.
+      </p>
+
+      <LegalH2>Tracking</LegalH2>
+      <p>
+        When a real shipment is booked, we will send a tracking number to the order email if the
+        courier provides one. Until fulfilment is live, no tracking email is generated by this
+        codebase.
+      </p>
+
+      <LegalH2>Delays and failed delivery</LegalH2>
+      <p>
+        Weather, courier disruption, or incorrect phone numbers can delay a parcel. If a delivery
+        fails, the courier&apos;s hold period applies. Contact {CONTACT_EMAIL} with your tracking
+        number.
+      </p>
+
+      <LegalH2>Returns of parcels</LegalH2>
+      <p>
+        How to send a garment back is on the{' '}
+        <Link href="/returns" className="underline underline-offset-4">
+          Returns &amp; Refunds
+        </Link>{' '}
+        page, including cooling-off and defective goods.
+      </p>
+    </LegalPage>
   )
 }

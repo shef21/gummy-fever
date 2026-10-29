@@ -1,41 +1,30 @@
 import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
 import { CheckCircle } from 'lucide-react'
+import SiteShell from '@/components/SiteShell'
 
 export default function CheckoutSuccessPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <Cart />
-
-      <main className="flex-1 flex items-center justify-center px-4 py-20">
-        <div className="max-w-md text-center text-white">
-          <CheckCircle className="w-16 h-16 mx-auto mb-6 text-green-600" />
-          <h1 className="text-3xl font-bold mb-4">Order Confirmed!</h1>
-          <p className="text-white mb-8">
-            Thank you for your purchase. You will receive a confirmation email
-            shortly.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/collections/all"
-              className="bg-black text-white px-6 py-3 font-medium hover:bg-gray-800 transition-colors uppercase tracking-wide"
-            >
-              Continue Shopping
-            </Link>
-            <Link
-              href="/"
-              className="border border-black px-6 py-3 font-medium hover:bg-black hover:text-white transition-colors uppercase tracking-wide"
-            >
-              Back to Home
-            </Link>
-          </div>
+    <SiteShell>
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <CheckCircle className="mx-auto mb-6 h-16 w-16 text-black" aria-hidden="true" />
+        <p className="eyebrow">Thank you</p>
+        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-black">
+          Order confirmed
+        </h1>
+        <p className="mt-4 text-black">
+          Thank you for your purchase. This checkout path currently simulates a successful order
+          after you are signed in. No payment processor is connected, so no card charge is made
+          from this site. If you need a record of the order, email us.
+        </p>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link href="/collections/all" className="btn-primary">
+            Continue shopping
+          </Link>
+          <Link href="/" className="btn-secondary">
+            Back to home
+          </Link>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </SiteShell>
   )
 }

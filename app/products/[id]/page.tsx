@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Cart from '@/components/Cart'
+import SiteShell from '@/components/SiteShell'
+import QuantityStepper from '@/components/QuantityStepper'
+import StatusScreen, { DefaultShopActions } from '@/components/StatusScreen'
 import { useCartStore } from '@/lib/store/cart-store'
 import { createClient } from '@/lib/supabase/client'
 import { getProductById } from '@/lib/data/products'
-import { Plus, Minus } from 'lucide-react'
+import { formatZar } from '@/lib/format'
 
 interface Product {
   id: string
@@ -28,7 +28,8 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const { addItem, openCart } = useCartStore()
+  const addItem = useCartStore((state) => state.addItem)
+  const openCart = useCartStore((state) => state.openCart)
 
   useEffect(() => {
     async function load() {
@@ -76,138 +77,133 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <p className="text-white">Loading...</p>
-      </div>
+      <SiteShell>
+        <div className="page-shell py-12" aria-busy="true" aria-live="polite">
+          <p className="sr-only">Loading product</p>
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+            <div className="aspect-square bg-neutral-100" />
+            <div className="space-y-4 pt-4">
+              <div className="h-10 w-2/3 bg-neutral-100" />
+              <div className="h-6 w-24 bg-neutral-100" />
+              <div className="h-24 w-full bg-neutral-100" />
+              <div className="h-12 w-full bg-neutral-100" />
+            </div>
+          </div>
+        </div>
+      </SiteShell>
     )
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col bg-black">
-        <Header />
-        <Cart />
-        <main className="flex-1 flex items-center justify-center px-4">
-          <div className="text-center text-white">
-            <h1 className="text-2xl font-bold mb-4">Product not found</h1>
-            <p className="mb-4">
-              This is a local UI preview. Products will be available once connected to a database.
-            </p>
-            <Link
-              href="/collections/all"
-              className="inline-block bg-white text-black px-6 py-3 font-medium hover:bg-gray-200 transition-colors"
-            >
-              Browse Collections
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <SiteShell>
+        <StatusScreen
+          kicker="Product"
+          title="Piece not found"
+          body="This item is not in the current drop, the link is wrong, or it has been pulled. Sold-out sizes are not restocked on the same drop."
+          actions={<DefaultShopActions />}
+        />
+      </SiteShell>
     )
   }
 
+  const activeImage = product.images?.[selectedImage]
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <Cart />
-
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Product Images */}
-            <div>
-              <div className="relative aspect-square bg-gray-800 mb-4">
-                {product.images && product.images[selectedImage] ? (
-                  <Image
-                    src={product.images[selectedImage]}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white">
-                    No Image
-                  </div>
-                )}
-              </div>
-              {product.images && product.images.length > 1 && (
-                <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`relative h-20 w-20 flex-shrink-0 bg-gray-800 border-2 ${
-                        selectedImage === index
-                          ? 'border-white'
-                          : 'border-transparent'
-                      }`}
-                    >
-                      <Image
-                        src={image}
-                        alt={`${product.name} ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
+    <SiteShell>
+      <div className="page-shell py-10 sm:py-14">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <div className="relative aspect-square bg-neutral-100">
+              {activeImage ? (
+                <Image
+                  src={activeImage}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-neutral-700">
+                  Image coming soon
                 </div>
               )}
             </div>
-
-            {/* Product Info */}
-            <div>
-              <h1 className="text-4xl font-bold mb-4 text-white">{product.name}</h1>
-              <p className="text-2xl font-bold mb-6 text-white">
-                R {Number(product.price).toFixed(2)}
-              </p>
-              <p className="text-white mb-8 leading-relaxed">
-                {product.description}
-              </p>
-
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-4 mb-8">
-                <span className="font-medium text-white">Quantity:</span>
-                <div className="flex items-center border border-white">
+            {product.images && product.images.length > 1 ? (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                {product.images.map((image, index) => (
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-white hover:bg-white hover:text-black transition-colors"
+                    key={image}
+                    type="button"
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative h-20 w-20 flex-shrink-0 bg-neutral-100 ${
+                      selectedImage === index ? 'ring-2 ring-black ring-offset-2' : ''
+                    }`}
+                    aria-label={`Show image ${index + 1} of ${product.name}`}
+                    aria-current={selectedImage === index}
                   >
-                    <Minus className="w-4 h-4" />
+                    <Image
+                      src={image}
+                      alt={`${product.name} view ${index + 1}`}
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
                   </button>
-                  <span className="px-6 py-2 text-white">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-white hover:bg-white hover:text-black transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+                ))}
               </div>
+            ) : null}
+          </div>
 
-              {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={!product.in_stock}
-                className={`w-full py-4 font-bold uppercase tracking-wide transition-colors ${
-                  product.in_stock
-                    ? 'bg-white text-black hover:bg-gray-200'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {product.in_stock ? 'Add to Cart' : 'Out of Stock'}
-              </button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
+              {product.name}
+            </h1>
+            <p className="mt-4 text-2xl font-bold text-black">{formatZar(product.price)}</p>
+            <p className="mt-6 leading-relaxed text-neutral-800">{product.description}</p>
 
-              {!product.in_stock && (
-                <p className="mt-4 text-sm text-white">
-                  This product is currently out of stock.
+            <p className="mt-6 text-sm text-neutral-800">
+              Limited drop. If your size is sold out it is not listed and will not be restocked on
+              this release. Check the description and photos for fit — this is a boxy cut.
+            </p>
+
+            <div className="mt-8">
+              <p id="qty-label" className="mb-3 font-medium text-black">
+                Quantity
+              </p>
+              <QuantityStepper
+                labelledBy="qty-label"
+                value={quantity}
+                onDecrease={() => setQuantity(Math.max(1, quantity - 1))}
+                onIncrease={() => setQuantity(quantity + 1)}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!product.in_stock}
+              className={`mt-8 w-full ${product.in_stock ? 'btn-primary' : 'btn bg-neutral-300 text-neutral-700'}`}
+            >
+              {product.in_stock ? 'Add to cart' : 'Sold out'}
+            </button>
+
+            {!product.in_stock ? (
+              <div className="mt-4 border border-black bg-neutral-50 p-4 text-sm text-black">
+                <p className="font-semibold">This piece is sold out</p>
+                <p className="mt-2 text-neutral-800">
+                  Sold-out garments and sizes are not restocked on the same drop. Browse what is
+                  still available, or email us if you need a fit question on a future release.
                 </p>
-              )}
-            </div>
+                <Link href="/collections/all" className="mt-4 inline-flex btn-secondary">
+                  Shop available pieces
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </SiteShell>
   )
 }

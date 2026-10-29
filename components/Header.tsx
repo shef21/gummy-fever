@@ -6,92 +6,92 @@ import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCartStore } from '@/lib/store/cart-store'
 import { useState } from 'react'
 
-export default function Header() {
-  const { openCart, getItemCount } = useCartStore()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const itemCount = getItemCount()
+const navLinks = [
+  { href: '/collections/new', label: 'New In' },
+  { href: '/collections/featured', label: 'Featured' },
+  { href: '/collections/all', label: 'Shop All' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+]
 
-  const navLinks = [
-    { href: '/collections/new', label: 'NEW IN' },
-    { href: '/collections/featured', label: 'FEATURED' },
-    { href: '/collections/all', label: 'SHOP ALL' },
-    { href: '/about', label: 'ABOUT' },
-    { href: '/contact', label: 'CONTACT' },
-  ]
+export default function Header() {
+  const openCart = useCartStore((state) => state.openCart)
+  const itemCount = useCartStore((state) =>
+    state.items.reduce((count, item) => count + item.quantity, 0)
+  )
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header 
-      className="sticky top-0 z-50 bg-white border-b border-black text-black"
-      style={{ backgroundColor: '#ffffff', color: '#000000' }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center shrink-0">
+    <header className="sticky top-0 z-50 border-b border-black bg-white text-black">
+      <div className="page-shell">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link href="/" className="flex min-h-11 items-center shrink-0">
             <Image
               src="/hero.jpeg"
-              alt="Gummy Fever"
+              alt="Gummy Fever home"
               width={140}
-              height={100}
-              className="h-16 w-auto object-contain"
+              height={48}
+              className="h-12 w-auto object-contain"
               priority
             />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="!text-black text-sm font-medium hover:underline uppercase tracking-wide"
-                style={{ color: '#000000' }}
+                className="tap px-3 text-xs font-semibold uppercase tracking-[0.16em] text-black hover:underline underline-offset-4"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            {/* Cart Button */}
+          <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={openCart}
-              className="relative flex items-center space-x-2 hover:opacity-70 transition-opacity !text-black"
-              style={{ color: '#000000' }}
+              className="relative tap text-black hover:opacity-70"
+              aria-label={itemCount > 0 ? `Open cart, ${itemCount} items` : 'Open cart'}
             >
-              <ShoppingCart className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
-              {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <ShoppingCart className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+              {itemCount > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-[11px] font-bold leading-none text-white">
                   {itemCount}
                 </span>
-              )}
+              ) : null}
             </button>
 
-            {/* Mobile Menu Button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden !text-black"
-              style={{ color: '#000000' }}
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="tap text-black md:hidden"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileMenuOpen ? (
-                <X className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="w-6 h-6 !text-black" style={{ color: '#000000', fill: '#000000' }} />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-black">
-            <div className="flex flex-col space-y-4">
+        {mobileMenuOpen ? (
+          <nav
+            id="mobile-nav"
+            className="border-t border-black py-3 md:hidden"
+            aria-label="Mobile"
+          >
+            <div className="flex flex-col">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="!text-black text-sm font-medium hover:underline uppercase tracking-wide"
-                  style={{ color: '#000000' }}
+                  className="flex min-h-11 items-center text-sm font-semibold uppercase tracking-[0.16em] text-black"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -99,7 +99,7 @@ export default function Header() {
               ))}
             </div>
           </nav>
-        )}
+        ) : null}
       </div>
     </header>
   )

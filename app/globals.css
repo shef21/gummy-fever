@@ -3,42 +3,125 @@
 @tailwind utilities;
 
 :root {
+  --gf-bg: #ffffff;
+  --gf-bg-muted: #f5f5f5;
+  --gf-ink: #111111;
+  --gf-ink-soft: #2a2a2a;
+  --gf-line: #111111;
+  --gf-invert: #111111;
+  --gf-invert-ink: #ffffff;
+  --gf-focus: #111111;
   --background: #ffffff;
-  --foreground: #000000;
+  --foreground: #111111;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--gf-bg);
+  color: var(--gf-ink);
+  overflow-x: clip;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans), Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Ensure header has white background and black text - FORCE OVERRIDE */
-header {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-  color: #000000 !important;
+:focus {
+  outline: none;
 }
 
-header *,
-header a,
-header button,
-header nav,
-header nav a,
-header svg,
-header path {
-  color: #000000 !important;
-  fill: #000000 !important;
-  stroke: #000000 !important;
+:focus-visible {
+  outline: 2px solid var(--gf-focus);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #111111;
+  color: #ffffff;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100%;
+  z-index: 100;
+  background: #111111;
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  min-height: 44px;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.hero-copy {
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85);
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-y {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.22em] text-black;
+  }
+
+  .display-title {
+    @apply text-3xl font-bold uppercase tracking-tight text-black sm:text-4xl md:text-5xl;
+  }
+
+  .btn {
+    @apply inline-flex min-h-11 min-w-11 items-center justify-center px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-black text-white hover:bg-neutral-800;
+  }
+
+  .btn-secondary {
+    @apply btn border border-black bg-white text-black hover:bg-black hover:text-white;
+  }
+
+  .btn-invert {
+    @apply btn bg-white text-black hover:bg-neutral-200;
+  }
+
+  .btn-ghost {
+    @apply btn border border-white bg-transparent text-white hover:bg-white hover:text-black;
+  }
+
+  .input-field {
+    @apply w-full min-h-11 border border-black bg-white px-4 py-3 text-base text-black placeholder:text-neutral-700;
+  }
+
+  .input-field-invert {
+    @apply w-full min-h-11 border border-white bg-black px-4 py-3 text-base text-white placeholder:text-neutral-300;
+  }
+
+  .tap {
+    @apply inline-flex min-h-11 min-w-11 items-center justify-center;
+  }
 }
 
 @layer utilities {
