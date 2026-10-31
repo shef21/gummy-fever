@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CheckoutError, recomputeOrderTotals } from '@/lib/checkout/recompute'
 import { getSiteUrl } from '@/lib/checkout/site-url'
-import { createYocoCheckout } from '@/lib/yoco/client'
+import { initializePaystackTransaction } from '@/lib/paystack/client'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!process.env.YOCO_SECRET_KEY) {
+    if (!process.env.PAYSTACK_SECRET_KEY) {
       return NextResponse.json(
         { error: 'Payment is not configured.' },
         { status: 503 }
@@ -112,6 +112,8 @@ export async function POST(request: Request) {
         status: 'pending',
         shipping_address: shipping,
         billing_address: shipping,
+        payment_provider: 'paystack',
+        payment_status: 'pending',
       })
       .select('id')
       .single()
@@ -144,32 +146,32 @@ export async function POST(request: Request) {
     }
 
     const siteUrl = getSiteUrl()
-    const checkout = await createYocoCheckout({
+    const paystack = await initializePaystackTransaction({
+      email,
       amountCents: computed.totalCents,
+      reference: order.id,
+      callbackUrl: `${siteUrl}/checkout/success`,
       orderId: order.id,
-      successUrl: `${siteUrl}/checkout/success?orderId=${encodeURIComponent(order.id)}`,
-      cancelUrl: `${siteUrl}/checkout/cancelled?orderId=${encodeURIComponent(order.id)}`,
-      failureUrl: `${siteUrl}/checkout/failed?orderId=${encodeURIComponent(order.id)}`,
-      lineItems: computed.lines.map((line) => ({
-        displayName: line.name,
-        quantity: line.quantity,
-        pricingDetails: { price: line.unitCents },
-      })),
     })
 
     const { error: updateError } = await admin
       .from('orders')
-      .update({ yoco_checkout_id: checkout.id })
+      .update({
+        payment_reference: paystack.reference,
+        payment_provider: 'paystack',
+        payment_status: 'pending',
+      })
       .eq('id', order.id)
       .eq('status', 'pending')
 
     if (updateError) {
-      console.error('Failed to store Yoco checkout id', updateError)
+      console.error('Failed to store Paystack reference', updateError)
     }
 
     return NextResponse.json({
       orderId: order.id,
-      redirectUrl: checkout.redirectUrl,
+      reference: paystack.reference,
+      redirectUrl: paystack.authorizationUrl,
     })
   } catch (error) {
     if (error instanceof CheckoutError) {

@@ -37,8 +37,10 @@ export interface Order {
   status: OrderStatus
   shipping_address: Record<string, unknown> | null
   billing_address: Record<string, unknown> | null
-  yoco_checkout_id: string | null
-  yoco_payment_id: string | null
+  payment_provider: string | null
+  payment_reference: string | null
+  payment_status: string | null
+  paid_at: string | null
   created_at: string
   updated_at: string
 }

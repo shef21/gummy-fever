@@ -8,7 +8,7 @@ export default function CheckoutCancelledPage() {
       <StatusScreen
         kicker="Payment"
         title="Payment cancelled"
-        body="The Yoco checkout was cancelled. No payment was taken. You can return to checkout and try again."
+        body="The Paystack checkout was cancelled. No payment was taken. You can return to checkout and try again."
         actions={
           <>
             <Link href="/checkout" className="btn-primary">

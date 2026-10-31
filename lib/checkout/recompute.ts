@@ -28,7 +28,7 @@ const UUID_RE =
 
 const MAX_LINES = 50
 const MAX_QUANTITY = 20
-const MIN_YOCO_CENTS = 200
+const MIN_PAYMENT_CENTS = 200
 
 export class CheckoutError extends Error {
   constructor(
@@ -212,7 +212,7 @@ export async function recomputeOrderTotals(
   }
 
   const totalCents = lines.reduce((sum, line) => sum + line.lineCents, 0)
-  if (totalCents < MIN_YOCO_CENTS) {
+  if (totalCents < MIN_PAYMENT_CENTS) {
     throw new CheckoutError('Orders must be at least R2.00.', 400)
   }
 

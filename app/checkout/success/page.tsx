@@ -14,12 +14,12 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const orderId = params.get('orderId')
-    if (!orderId) {
+    const reference = params.get('reference') ?? params.get('trxref')
+    if (!reference) {
       setView('missing')
       return
     }
-    const confirmedOrderId = orderId
+    const confirmedReference = reference
 
     let cancelled = false
     let attempts = 0
@@ -27,7 +27,7 @@ export default function CheckoutSuccessPage() {
 
     async function poll() {
       const response = await fetch(
-        `/api/checkout/status?orderId=${encodeURIComponent(confirmedOrderId)}`
+        `/api/checkout/verify?reference=${encodeURIComponent(confirmedReference)}`
       )
       const payload = (await response.json().catch(() => null)) as {
         status?: string
@@ -67,7 +67,7 @@ export default function CheckoutSuccessPage() {
         <StatusScreen
           kicker="Payment"
           title="Payment failed"
-          body="Yoco did not complete this payment. The order was not marked paid — you can return to checkout and try again."
+          body="Paystack did not complete this payment. The order was not marked paid — you can return to checkout and try again."
           actions={
             <>
               <Link href="/checkout" className="btn-primary">
@@ -89,7 +89,7 @@ export default function CheckoutSuccessPage() {
         <StatusScreen
           kicker="Payment"
           title="Confirming payment"
-          body="Yoco is still confirming this payment. The cart is only cleared after the order is marked paid. You will receive an email once it is confirmed — do not pay again unless you were not charged."
+          body="Paystack is still confirming this payment. The cart is only cleared after the order is marked paid. You will receive an email once it is confirmed — do not pay again unless you were not charged."
           actions={
             <>
               <Link href="/collections/all" className="btn-primary">
@@ -133,7 +133,7 @@ export default function CheckoutSuccessPage() {
         <StatusScreen
           kicker="Payment"
           title="Confirming payment"
-          body="Please wait while we confirm your payment with Yoco."
+          body="Please wait while we confirm your payment with Paystack."
         />
       </SiteShell>
     )

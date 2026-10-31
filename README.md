@@ -6,7 +6,7 @@ A modern, minimalist ecommerce website for premium gummy clothing, built with Ne
 
 - 🛍️ Product catalog with categories and collections
 - 🛒 Shopping cart with persistent storage
-- 💳 Yoco checkout (ZAR) with signed webhooks
+- 💳 Paystack checkout (ZAR) with signed webhooks
 - 📱 Fully responsive design
 - 🎨 Modern, clean UI inspired by cultish.com
 - 🔐 Secure authentication ready (Supabase Auth)
@@ -46,15 +46,14 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-YOCO_SECRET_KEY=
-YOCO_WEBHOOK_SECRET=
+PAYSTACK_SECRET_KEY=
 ```
 
 3. Set up the database:
    - Go to your Supabase project dashboard
    - Navigate to SQL Editor
    - Run the SQL script from `supabase/schema.sql`
-   - Run `supabase/migrations/20261029170000_add_yoco_payment_columns.sql` for Yoco payment columns (do not apply it from this app)
+   - Run `supabase/migrations/20261031120000_add_payment_columns.sql` for payment columns (do not apply it from this app)
 
 4. Run the development server:
 ```bash
@@ -70,8 +69,8 @@ npm run dev
 │   ├── page.tsx           # Homepage
 │   ├── collections/       # Collection pages
 │   ├── products/          # Product detail pages
-│   ├── checkout/          # Checkout + Yoco return pages
-│   ├── api/               # Checkout + Yoco webhook routes
+│   ├── checkout/          # Checkout + Paystack return pages
+│   ├── api/               # Checkout + Paystack webhook routes
 │   └── layout.tsx         # Root layout
 ├── components/            # React components
 │   ├── Header.tsx        # Navigation header
@@ -79,7 +78,7 @@ npm run dev
 │   └── Footer.tsx        # Footer component
 ├── lib/                   # Utility functions
 │   ├── supabase/         # Supabase client setup
-│   ├── yoco/             # Yoco Checkout API helpers
+│   ├── paystack/         # Paystack API helpers
 │   ├── checkout/         # Server-side totals
 │   └── store/            # Zustand stores
 ├── types/                 # TypeScript type definitions
@@ -94,9 +93,9 @@ The database includes the following tables:
 - `categories` - Product categories
 - `products` - Product information
 - `product_variants` - Product variants (size, color, etc.)
-- `orders` - Customer orders (pending until Yoco webhook marks paid/failed)
+- `orders` - Customer orders (pending until Paystack verify/webhook marks paid)
 - `order_items` - Order line items
-- `yoco_webhook_events` - Idempotent Yoco webhook deliveries
+- `payment_webhook_events` - Idempotent payment webhook deliveries
 - `newsletter_subscribers` - Newsletter email list
 
 ## Adding Products
@@ -109,36 +108,30 @@ You can add products through the Supabase dashboard or by creating an admin inte
 - Category ID
 - Stock status
 
-## Payment Integration (Yoco)
+## Payment Integration (Paystack)
 
-Checkout uses [Yoco Checkout API](https://developer.yoco.com) in **ZAR**. Totals are recomputed server-side from Supabase `products` / `product_variants` prices. Client prices are ignored. Card details are collected on Yoco's hosted page, never on this site.
+Checkout uses [Paystack](https://paystack.com/docs/payments/accept-payments/) in **ZAR** (South Africa). Totals are recomputed server-side from Supabase `products` / `product_variants` prices. Client prices are ignored. The customer is redirected to Paystack Checkout (`authorization_url`). Card details never touch this site.
+
+The success page calls `GET /transaction/verify/:reference` on the server. A signed `charge.success` webhook is the durable confirmation. The callback URL alone is not treated as proof of payment.
 
 ### Owner setup (required before live payments)
 
-1. **Apply the database migration** in the Supabase SQL editor: run `supabase/migrations/20261029170000_add_yoco_payment_columns.sql`. Do not skip this — orders need `yoco_checkout_id` / `yoco_payment_id`, and webhooks need `yoco_webhook_events`.
+1. **Apply the database migration** in the Supabase SQL editor: run `supabase/migrations/20261031120000_add_payment_columns.sql`. Do not skip this — orders need `payment_provider`, `payment_reference`, `payment_status`, and `paid_at`, and webhooks need `payment_webhook_events`.
 2. **Supabase keys** (Project → Settings → API):
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only; never `NEXT_PUBLIC_`)
-3. **Site URL**: set `NEXT_PUBLIC_SITE_URL` to `https://gummyfever.com` in production (or `http://localhost:3000` locally). This is used for Yoco `successUrl` / `cancelUrl` / `failureUrl`.
-4. **Yoco test secret key**: in the Yoco App open **Checkout API → How to connect → Test keys** and copy the Test secret key into `YOCO_SECRET_KEY` (`sk_test_...`). Domain verification is not required for test keys.
-5. **Register the webhook** with that same secret key (the secret in the response is shown **once**):
-
-```bash
-curl -X POST https://payments.yoco.com/api/webhooks \
-  -H "Authorization: Bearer $YOCO_SECRET_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"gummy-fever-orders","url":"https://gummyfever.com/api/webhooks/yoco"}'
-```
-
-Local testing: expose the app with HTTPS (for example ngrok) and use that URL as `url`. Production webhook URL is `https://gummyfever.com/api/webhooks/yoco`.
-
-6. Set `YOCO_WEBHOOK_SECRET` to the returned `secret` (`whsec_...`).
+3. **Site URL**: set `NEXT_PUBLIC_SITE_URL` to `https://gummyfever.com` in production (or `http://localhost:3000` locally). This is used as Paystack `callback_url` (`https://gummyfever.com/checkout/success`).
+4. **Paystack secret key**: log in at [Paystack Dashboard](https://dashboard.paystack.com) (South Africa). Open **Settings → API Keys & Webhooks**. Copy the **Test Secret Key** (`sk_test_...`) into `PAYSTACK_SECRET_KEY`. The public key is not required for this redirect integration.
+5. **Webhook URL** (same dashboard page, Test mode):  
+   `https://gummyfever.com/api/webhooks/paystack`
+6. **Callback URL** (same dashboard page, and also sent per transaction):  
+   `https://gummyfever.com/checkout/success`
 7. Add the same env var **names** on Vercel (Project → Settings → Environment Variables). Do not commit values.
-8. **Test**: complete a checkout with [Yoco test card details](https://developer.yoco.com/docs/checkout-api/testing) from the Yoco App. Confirm the order in Supabase moves from `pending` to `paid` after the webhook. Minimum charge is R2.00 (200 cents).
-9. **Go live**: verify `gummyfever.com` under Yoco **Verified Domains**, switch `YOCO_SECRET_KEY` to the live secret (`sk_live_...`), and register a live webhook the same way (or reuse the URL) so you get a live `YOCO_WEBHOOK_SECRET`.
+8. **Test**: complete a checkout with [Paystack test cards](https://paystack.com/docs/payments/test-payments/) (for example `4084084084084081`). Confirm the order in Supabase moves from `pending` to `paid` after verify/webhook. Amount is in cents (R1.00 = 100). Minimum charge here is R2.00.
+9. **Go live**: switch the dashboard to Live, copy the **Live Secret Key** (`sk_live_...`) into `PAYSTACK_SECRET_KEY`, and set the **Live** webhook URL to `https://gummyfever.com/api/webhooks/paystack` (test and live webhooks are configured separately).
 
-Never put `YOCO_SECRET_KEY` or `YOCO_WEBHOOK_SECRET` in client code. Payment success is confirmed only by the signed webhook, not by the success URL.
+Never put `PAYSTACK_SECRET_KEY` in client code. `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` is unused here.
 
 ## Security Notes
 
@@ -146,7 +139,8 @@ Never put `YOCO_SECRET_KEY` or `YOCO_WEBHOOK_SECRET` in client code. Payment suc
 - Public read access is granted for products and categories
 - User-specific access is enforced for orders (read own orders only)
 - Orders are created with the service role after server-side price checks; clients cannot insert orders
-- Yoco webhook signatures are verified (HMAC-SHA256, `whsec_` secret); replay window is 3 minutes
+- Paystack webhook signatures are verified (HMAC-SHA512 of the raw body vs `x-paystack-signature`)
+- The success page verifies the transaction with Paystack before clearing the cart
 - Never commit `.env.local` files to version control
 
 ## Deployment

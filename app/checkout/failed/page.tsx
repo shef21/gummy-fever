@@ -8,7 +8,7 @@ export default function CheckoutFailedPage() {
       <StatusScreen
         kicker="Payment"
         title="Payment failed"
-        body="Yoco could not complete this payment. No order was marked paid. You can return to checkout and try again."
+        body="Paystack could not complete this payment. No order was marked paid. You can return to checkout and try again."
         actions={
           <>
             <Link href="/checkout" className="btn-primary">

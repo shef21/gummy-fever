@@ -8,7 +8,7 @@ import StatusScreen from '@/components/StatusScreen'
 import { useCartStore } from '@/lib/store/cart-store'
 import { createClient } from '@/lib/supabase/client'
 import { formatZar } from '@/lib/format'
-import { isYocoCheckoutUrl } from '@/lib/yoco/urls'
+import { isPaystackCheckoutUrl } from '@/lib/paystack/urls'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -92,7 +92,7 @@ export default function CheckoutPage() {
         redirectUrl?: string
       } | null
 
-      if (!response.ok || !payload?.redirectUrl || !isYocoCheckoutUrl(payload.redirectUrl)) {
+      if (!response.ok || !payload?.redirectUrl || !isPaystackCheckoutUrl(payload.redirectUrl)) {
         setError(payload?.error || 'Unable to start payment. Please try again.')
         setProcessing(false)
         return
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
         <p className="eyebrow">Order</p>
         <h1 className="display-title mt-3">Checkout</h1>
         <p className="mt-4 max-w-2xl text-sm text-neutral-800">
-          Checkout requires an account. You will be redirected to Yoco to pay securely in ZAR.
+          Checkout requires an account. You will be redirected to Paystack to pay securely in ZAR.
           We never see or store your card details. Order totals are confirmed on the server from
           live product prices.
         </p>
@@ -259,8 +259,9 @@ export default function CheckoutPage() {
             <section>
               <h2 className="mb-4 text-xl font-bold text-black">Payment</h2>
               <p className="text-sm text-neutral-800">
-                Yoco hosts the card form. After you pay, we confirm the order from a signed
-                webhook — the return URL alone is not treated as proof of payment.
+                Paystack hosts the card form. After you pay, we confirm the order by verifying
+                the transaction server-side and from a signed webhook — the return URL alone is
+                not treated as proof of payment.
               </p>
             </section>
           </div>
@@ -302,8 +303,8 @@ export default function CheckoutPage() {
                   : !userId
                     ? 'Login to checkout'
                     : processing
-                      ? 'Redirecting to Yoco...'
-                      : 'Pay with Yoco'}
+                      ? 'Redirecting to Paystack...'
+                      : 'Pay with Paystack'}
               </button>
             </div>
           </div>
