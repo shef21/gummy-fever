@@ -1,30 +1,161 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle } from 'lucide-react'
 import SiteShell from '@/components/SiteShell'
+import StatusScreen from '@/components/StatusScreen'
+import { useCartStore } from '@/lib/store/cart-store'
+
+type ViewState = 'loading' | 'paid' | 'failed' | 'pending' | 'missing'
 
 export default function CheckoutSuccessPage() {
+  const clearCart = useCartStore((state) => state.clearCart)
+  const [view, setView] = useState<ViewState>('loading')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const reference = params.get('reference') ?? params.get('trxref')
+    if (!reference) {
+      setView('missing')
+      return
+    }
+    const confirmedReference = reference
+
+    let cancelled = false
+    let attempts = 0
+    const maxAttempts = 15
+
+    async function poll() {
+      const response = await fetch(
+        `/api/checkout/verify?reference=${encodeURIComponent(confirmedReference)}`
+      )
+      const payload = (await response.json().catch(() => null)) as {
+        status?: string
+      } | null
+
+      if (cancelled) return
+
+      if (payload?.status === 'paid') {
+        clearCart()
+        setView('paid')
+        return
+      }
+
+      if (payload?.status === 'failed') {
+        setView('failed')
+        return
+      }
+
+      attempts += 1
+      if (attempts >= maxAttempts) {
+        setView('pending')
+        return
+      }
+
+      window.setTimeout(poll, 2000)
+    }
+
+    poll()
+    return () => {
+      cancelled = true
+    }
+  }, [clearCart])
+
+  if (view === 'failed') {
+    return (
+      <SiteShell>
+        <StatusScreen
+          kicker="Payment"
+          title="Payment failed"
+          body="Paystack did not complete this payment. The order was not marked paid — you can return to checkout and try again."
+          actions={
+            <>
+              <Link href="/checkout" className="btn-primary">
+                Return to checkout
+              </Link>
+              <Link href="/" className="btn-secondary">
+                Back home
+              </Link>
+            </>
+          }
+        />
+      </SiteShell>
+    )
+  }
+
+  if (view === 'pending') {
+    return (
+      <SiteShell>
+        <StatusScreen
+          kicker="Payment"
+          title="Confirming payment"
+          body="Paystack is still confirming this payment. The cart is only cleared after the order is marked paid. You will receive an email once it is confirmed — do not pay again unless you were not charged."
+          actions={
+            <>
+              <Link href="/collections/all" className="btn-primary">
+                Continue shopping
+              </Link>
+              <Link href="/" className="btn-secondary">
+                Back home
+              </Link>
+            </>
+          }
+        />
+      </SiteShell>
+    )
+  }
+
+  if (view === 'missing') {
+    return (
+      <SiteShell>
+        <StatusScreen
+          kicker="Payment"
+          title="Payment received"
+          body="If you completed payment, you will receive a confirmation email shortly. Your cart is only cleared after the order is marked paid."
+          actions={
+            <>
+              <Link href="/collections/all" className="btn-primary">
+                Continue shopping
+              </Link>
+              <Link href="/" className="btn-secondary">
+                Back home
+              </Link>
+            </>
+          }
+        />
+      </SiteShell>
+    )
+  }
+
+  if (view === 'loading') {
+    return (
+      <SiteShell>
+        <StatusScreen
+          kicker="Payment"
+          title="Confirming payment"
+          body="Please wait while we confirm your payment with Paystack."
+        />
+      </SiteShell>
+    )
+  }
+
   return (
     <SiteShell>
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <CheckCircle className="mx-auto mb-6 h-16 w-16 text-black" aria-hidden="true" />
-        <p className="eyebrow">Thank you</p>
-        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-black">
-          Order confirmed
-        </h1>
-        <p className="mt-4 text-black">
-          Thank you for your purchase. This checkout path currently simulates a successful order
-          after you are signed in. No payment processor is connected, so no card charge is made
-          from this site. If you need a record of the order, email us.
-        </p>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/collections/all" className="btn-primary">
-            Continue shopping
-          </Link>
-          <Link href="/" className="btn-secondary">
-            Back to home
-          </Link>
-        </div>
-      </div>
+      <StatusScreen
+        kicker="Thank you"
+        title="Order confirmed"
+        body="Thank you for your purchase. You will receive a confirmation email shortly."
+        actions={
+          <>
+            <Link href="/collections/all" className="btn-primary">
+              Continue shopping
+            </Link>
+            <Link href="/" className="btn-secondary">
+              Back home
+            </Link>
+          </>
+        }
+      />
     </SiteShell>
   )
 }
