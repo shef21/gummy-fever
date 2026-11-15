@@ -8,12 +8,12 @@ import StatusScreen from '@/components/StatusScreen'
 import { useCartStore } from '@/lib/store/cart-store'
 import { createClient } from '@/lib/supabase/client'
 import { formatZar } from '@/lib/format'
+import { isPaystackCheckoutUrl } from '@/lib/paystack/urls'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const items = useCartStore((state) => state.items)
   const getTotal = useCartStore((state) => state.getTotal)
-  const clearCart = useCartStore((state) => state.clearCart)
   const [authLoading, setAuthLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -24,11 +24,9 @@ export default function CheckoutPage() {
     city: '',
     postalCode: '',
     country: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
   })
   const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -39,12 +37,18 @@ export default function CheckoutPage() {
         return
       }
 
-      const { data, error } = await supabase.auth.getUser()
-      if (error) {
-        console.error('Checkout auth.getUser() failed', error)
+      const { data, error: authError } = await supabase.auth.getUser()
+      if (authError) {
+        console.error('Checkout auth.getUser() failed', authError)
         setUserId(null)
       } else {
         setUserId(data.user?.id ?? null)
+        if (data.user?.email) {
+          setFormData((prev) => ({
+            ...prev,
+            email: prev.email || data.user!.email!,
+          }))
+        }
       }
       setAuthLoading(false)
     }
@@ -53,6 +57,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     if (!userId) {
       setProcessing(false)
       router.push(`/login?returnUrl=${encodeURIComponent('/checkout')}`)
@@ -60,11 +65,44 @@ export default function CheckoutPage() {
     }
     setProcessing(true)
 
-    setTimeout(() => {
-      clearCart()
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          shipping: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            country: formData.country,
+          },
+          items: items.map((item) => ({
+            productId: item.id,
+            variant: item.variant ?? null,
+            quantity: item.quantity,
+          })),
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string
+        redirectUrl?: string
+      } | null
+
+      if (!response.ok || !payload?.redirectUrl || !isPaystackCheckoutUrl(payload.redirectUrl)) {
+        setError(payload?.error || 'Unable to start payment. Please try again.')
+        setProcessing(false)
+        return
+      }
+
+      window.location.href = payload.redirectUrl
+    } catch {
+      setError('Unable to start payment. Please try again.')
       setProcessing(false)
-      router.push('/checkout/success')
-    }, 2000)
+    }
   }
 
   if (items.length === 0) {
@@ -89,18 +127,15 @@ export default function CheckoutPage() {
     )
   }
 
-  const field =
-    'input-field'
-
   return (
     <SiteShell>
       <div className="page-shell max-w-4xl py-12 sm:py-16">
         <p className="eyebrow">Order</p>
         <h1 className="display-title mt-3">Checkout</h1>
         <p className="mt-4 max-w-2xl text-sm text-neutral-800">
-          Checkout requires an account. No payment processor is connected yet — completing an
-          order simulates a successful placement after you are signed in. Do not enter live card
-          details.
+          Checkout requires an account. You will be redirected to Paystack to pay securely in ZAR.
+          We never see or store your card details. Order totals are confirmed on the server from
+          live product prices.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-3">
@@ -119,7 +154,7 @@ export default function CheckoutPage() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={field}
+                className="input-field"
               />
             </section>
 
@@ -138,7 +173,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className={field}
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -153,7 +188,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className={field}
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -169,7 +204,7 @@ export default function CheckoutPage() {
                   required
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className={field}
+                  className="input-field"
                 />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -185,7 +220,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className={field}
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -200,7 +235,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.postalCode}
                     onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    className={field}
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -216,65 +251,18 @@ export default function CheckoutPage() {
                   required
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className={field}
+                  className="input-field"
                 />
               </div>
             </section>
 
             <section>
-              <h2 className="mb-4 text-xl font-bold text-black">Payment information</h2>
-              <p className="mb-4 text-sm text-neutral-800">
-                Card fields are collected in the browser only. No payment provider is wired, and
-                no charge is made.
+              <h2 className="mb-4 text-xl font-bold text-black">Payment</h2>
+              <p className="text-sm text-neutral-800">
+                Paystack hosts the card form. After you pay, we confirm the order by verifying
+                the transaction server-side and from a signed webhook — the return URL alone is
+                not treated as proof of payment.
               </p>
-              <label htmlFor="cardNumber" className="mb-2 block font-medium text-black">
-                Card number
-              </label>
-              <input
-                id="cardNumber"
-                type="text"
-                name="cardNumber"
-                autoComplete="cc-number"
-                inputMode="numeric"
-                required
-                value={formData.cardNumber}
-                onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                className={`${field} mb-4`}
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="expiryDate" className="mb-2 block font-medium text-black">
-                    Expiry (MM/YY)
-                  </label>
-                  <input
-                    id="expiryDate"
-                    type="text"
-                    name="expiryDate"
-                    autoComplete="cc-exp"
-                    placeholder="MM/YY"
-                    required
-                    value={formData.expiryDate}
-                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cvv" className="mb-2 block font-medium text-black">
-                    CVV
-                  </label>
-                  <input
-                    id="cvv"
-                    type="text"
-                    name="cvv"
-                    autoComplete="cc-csc"
-                    inputMode="numeric"
-                    required
-                    value={formData.cvv}
-                    onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
-                    className={field}
-                  />
-                </div>
-              </div>
             </section>
           </div>
 
@@ -300,6 +288,11 @@ export default function CheckoutPage() {
                 <span>Total</span>
                 <span>{formatZar(getTotal())}</span>
               </div>
+              {error ? (
+                <p className="mt-4 text-sm text-red-700" role="alert">
+                  {error}
+                </p>
+              ) : null}
               <button
                 type="submit"
                 disabled={processing || authLoading || !userId}
@@ -310,8 +303,8 @@ export default function CheckoutPage() {
                   : !userId
                     ? 'Login to checkout'
                     : processing
-                      ? 'Processing...'
-                      : 'Complete order'}
+                      ? 'Redirecting to Paystack...'
+                      : 'Pay with Paystack'}
               </button>
             </div>
           </div>
